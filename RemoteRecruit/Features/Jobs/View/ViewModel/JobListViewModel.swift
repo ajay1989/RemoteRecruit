@@ -7,20 +7,25 @@
 
 import Foundation
 import Observation
+import Combine
 
 @Observable
 final class JobListViewModel {
     var jobs: [Job] = []
-    var searchText: String = ""
+    var searchText: String = "" {
+        didSet { searchSubject.send(searchText) }
+    }
     var isLoading: Bool = false
     var errorMessage: String? = nil
     
+    private(set) var debouncedSearchText: String = ""
+    
     // Filters locally without extra network call
     var filteredJobs: [Job] {
-        if searchText.isEmpty { return jobs }
+        if debouncedSearchText.isEmpty { return jobs }
         return jobs.filter {
-            $0.title.localizedCaseInsensitiveContains(searchText) ||
-            $0.companyName.localizedCaseInsensitiveContains(searchText)
+            $0.title.localizedCaseInsensitiveContains(debouncedSearchText) ||
+            $0.companyName.localizedCaseInsensitiveContains(debouncedSearchText)
         }
     }
     
@@ -31,9 +36,22 @@ final class JobListViewModel {
     private let service: JobsServiceProtocol
     // Cancels previous request before starting a new one
     private var loadTask: Task<Void, Never>?
+    private let searchSubject = PassthroughSubject<String, Never>()
+    private var cancellables = Set<AnyCancellable>()
     
     init(service: JobsServiceProtocol) {
         self.service = service
+        setupSearchDebounce()
+    }
+    
+    // Delays search to avoid filtering on every keystroke
+    private func setupSearchDebounce() {
+        searchSubject
+            .debounce(for: .milliseconds(300), scheduler: RunLoop.main)
+            .sink { [weak self] text in
+                self?.debouncedSearchText = text
+            }
+            .store(in: &cancellables)
     }
     
     func loadJobs() {
