@@ -9,9 +9,14 @@ import Testing
 @testable import RemoteRecruit
 
 struct RemoteRecruitTests {
-
-    @Test func example() async throws {
-        // Write your test here and use APIs like `#expect(...)` to check expected conditions.
+    
+    @Test func stripsHTMLTags() {
+        let html = "<p>Hello <b>World</b></p>"
+        #expect(html.strippedHTML == "Hello World")
     }
-
+    
+    @Test func plainTextUnchanged() {
+        let text = "No HTML here"
+        #expect(text.strippedHTML == "No HTML here")
+    }
 }
