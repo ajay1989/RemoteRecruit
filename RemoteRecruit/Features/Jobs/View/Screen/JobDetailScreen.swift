@@ -29,16 +29,9 @@ struct JobDetailScreen: View {
     
     private var headerSection: some View {
         VStack(alignment: .leading, spacing: AppConstants.Spacing.small) {
-            AsyncImage(url: job.companyLogoURL) { image in
-                image
-                    .resizable()
-                    .scaledToFit()
-                    .frame(height: AppConstants.Spacing.logoHeight)
-            } placeholder: {
-                Image(systemName: AppConstants.Icon.company)
-                    .font(.largeTitle)
-                    .foregroundStyle(.secondary)
-            }
+            Image(systemName: AppConstants.Icon.company)
+                .font(.largeTitle)
+                .foregroundStyle(.secondary)
             
             Text(job.title)
                 .font(.title2)
