@@ -47,7 +47,7 @@ final class JobListViewModel {
     // Delays search to avoid filtering on every keystroke
     private func setupSearchDebounce() {
         searchSubject
-            .debounce(for: .milliseconds(300), scheduler: RunLoop.main)
+            .debounce(for: .milliseconds(300), scheduler: DispatchQueue.main)
             .sink { [weak self] text in
                 self?.debouncedSearchText = text
             }
